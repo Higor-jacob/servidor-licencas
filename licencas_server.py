@@ -275,6 +275,69 @@ def verificar_licenca():
     except Exception as e:
         return jsonify({"status": "invalida", "erro": str(e)})
 
+
+# ============================================
+# 🔧 PAINEL DE DEBUG UNIVERSAL
+# ============================================
+
+@app.route("/debug")
+def debug_home():
+    return """
+    <h1>Debug Tools</h1>
+    <ul>
+        <li><a href='/debug/dbpath'>Mostrar caminho do banco</a></li>
+        <li><a href='/debug/show'>Mostrar registros</a></li>
+        <li><a href='/debug/download-db'>Baixar banco</a></li>
+        <li><a href='/debug/upload-db'>Subir banco</a></li>
+        <li><a href='/debug/migrar'>Migrar banco antigo para o persistente</a></li>
+    </ul>
+    """
+
+@app.route("/debug/dbpath")
+def debug_dbpath():
+    return f"Banco atual: {DB}"
+
+@app.route("/debug/show")
+def debug_show():
+    conn = conectar()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM licencas")
+    dados = [dict(row) for row in cur.fetchall()]
+    conn.close()
+    return jsonify(dados)
+
+@app.route("/debug/download-db")
+def debug_download():
+    return send_from_directory(os.path.dirname(DB), os.path.basename(DB), as_attachment=True)
+
+@app.route("/debug/upload-db", methods=["GET", "POST"])
+def debug_upload():
+    if request.method == "POST":
+        file = request.files.get("arquivo")
+        if file:
+            file.save(DB)
+            return "✔ Banco atualizado com sucesso!"
+        return "❌ Nenhum arquivo enviado."
+    
+    return """
+    <h3>Enviar novo banco (.db)</h3>
+    <form method='post' enctype='multipart/form-data'>
+        <input type='file' name='arquivo'>
+        <button type='submit'>Enviar</button>
+    </form>
+    """
+
+@app.route("/debug/migrar")
+def debug_migrar():
+    antigo = "/opt/render/project/src/licencas.db"
+    novo = DB
+
+    if os.path.exists(antigo):
+        import shutil
+        shutil.copy(antigo, novo)
+        return "✔ Banco migrado para o persistente!"
+    return "❌ Banco antigo não encontrado."
+
 # ========== EXECUÇÃO ==========
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5050))
