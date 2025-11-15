@@ -1,0 +1,48 @@
+body {
+    background: radial-gradient(circle at top, #1f2933, #050608 55%);
+    min-height: 100vh;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.card-kpi {
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}
+
+.card-kpi h4 {
+    margin: 0;
+    font-size: 1.6rem;
+}
+
+.card-kpi p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.table-dark tbody tr:hover {
+    background-color: rgba(255,255,255,0.04);
+}
+
+.badge {
+    font-size: 0.8rem;
+}
+
+.form-licenca {
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 10px 35px rgba(0,0,0,0.6);
+}
+
+.login-card {
+    max-width: 380px;
+    margin: 80px auto;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.75);
+}
