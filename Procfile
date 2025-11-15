@@ -1,0 +1,1 @@
+web: gunicorn licencas_server:app
