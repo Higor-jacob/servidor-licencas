@@ -13,7 +13,7 @@ PRIVATE_KEY = os.path.join(BASE_DIR, "private.pem")
 PUBLIC_KEY = os.path.join(BASE_DIR, "public.pem")
 LIC_DIR = os.path.join(BASE_DIR, "licencas_emitidas")
 
-SECRET_KEY = "uma_chave_secreta_muito_forte"
+SECRET_KEY = os.environ.get("SECRET_KEY", os.urandom(32))
 ADMIN_USER = "admin"
 ADMIN_PASS_HASH = generate_password_hash("admin")
 
@@ -120,6 +120,10 @@ def exige_login(f):
         return f(*args, **kwargs)
     return wrapper
 
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
 
 # ========== ROTAS PRINCIPAIS ==========
 @app.route("/")
