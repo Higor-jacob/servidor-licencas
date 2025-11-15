@@ -6,25 +6,32 @@ from cryptography.hazmat.backends import default_backend
 from werkzeug.security import generate_password_hash, check_password_hash
 from waitress import serve
 
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB = os.path.join(BASE_DIR, "licencas.db")
-PRIVATE_KEY_PEM = os.getenv("PRIVATE_KEY_PEM")
-PUBLIC_KEY_PEM = os.getenv("PUBLIC_KEY_PEM")
+
+# 🔹 Diretório persistente do Render
+PERSIST_DIR = "/opt/render/persistent/licencas"
+os.makedirs(PERSIST_DIR, exist_ok=True)
+
+# 🔹 Banco persistente
+DB = os.path.join(PERSIST_DIR, "licencas.db")
+
+# 🔹 Chaves
 PRIVATE_KEY = os.path.join(BASE_DIR, "private.pem")
 PUBLIC_KEY = os.path.join(BASE_DIR, "public.pem")
-LIC_DIR = os.path.join(BASE_DIR, "licencas_emitidas")
+
+PRIVATE_KEY_PEM = os.getenv("PRIVATE_KEY_PEM")
+PUBLIC_KEY_PEM = os.getenv("PUBLIC_KEY_PEM")
+
+# 🔹 Licenças geradas (persistente)
+LIC_DIR = os.path.join(PERSIST_DIR, "licencas_emitidas")
+os.makedirs(LIC_DIR, exist_ok=True)
 
 SECRET_KEY = os.environ.get("SECRET_KEY", os.urandom(32))
 ADMIN_USER = "admin"
 ADMIN_PASS_HASH = generate_password_hash("admin")
 
-os.makedirs(LIC_DIR, exist_ok=True)
-
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = SECRET_KEY
-
-# Sessão expira ao fechar o navegador
 app.permanent_session_lifetime = datetime.timedelta(days=1)
 
 
@@ -231,7 +238,7 @@ def verificar_licenca():
 
     try:
         payload_bytes = base64.b64decode(licenca["payload"])
-        assinatura = base64.b64decode(licenca["assinatura"])
+        assinatura = base64.b64decode(licenca["assinatura"])    
 
         if PUBLIC_KEY_PEM:
             public_key = serialization.load_pem_public_key(PUBLIC_KEY_PEM.encode())
