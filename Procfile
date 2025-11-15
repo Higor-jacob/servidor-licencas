@@ -1,1 +1,1 @@
-web: gunicorn licencas_server:app
+web: gunicorn licencas_server:app --preload --workers 1 --threads 8

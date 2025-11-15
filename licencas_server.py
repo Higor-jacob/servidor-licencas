@@ -19,7 +19,7 @@ ADMIN_PASS_HASH = generate_password_hash("admin")
 
 os.makedirs(LIC_DIR, exist_ok=True)
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = SECRET_KEY
 
 
