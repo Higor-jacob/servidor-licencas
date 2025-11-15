@@ -9,6 +9,8 @@ from waitress import serve
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE_DIR, "licencas.db")
+PRIVATE_KEY_PEM = os.getenv("PRIVATE_KEY_PEM")
+PUBLIC_KEY_PEM = os.getenv("PUBLIC_KEY_PEM")
 PRIVATE_KEY = os.path.join(BASE_DIR, "private.pem")
 PUBLIC_KEY = os.path.join(BASE_DIR, "public.pem")
 LIC_DIR = os.path.join(BASE_DIR, "licencas_emitidas")
@@ -55,6 +57,15 @@ init_db()
 
 # ========== GERAÇÃO ==========
 def carregar_chave_privada(senha=None):
+    # 1) Tenta carregar da variável de ambiente
+    if PRIVATE_KEY_PEM:
+        return serialization.load_pem_private_key(
+            PRIVATE_KEY_PEM.encode(),
+            password=senha.encode() if senha else None,
+            backend=default_backend()
+        )
+
+    # 2) Fallback: tenta carregar do arquivo físico
     with open(PRIVATE_KEY, "rb") as f:
         return serialization.load_pem_private_key(
             f.read(),
@@ -222,8 +233,11 @@ def verificar_licenca():
         payload_bytes = base64.b64decode(licenca["payload"])
         assinatura = base64.b64decode(licenca["assinatura"])
 
-        with open(PUBLIC_KEY, "rb") as f:
-            public_key = serialization.load_pem_public_key(f.read())
+        if PUBLIC_KEY_PEM:
+            public_key = serialization.load_pem_public_key(PUBLIC_KEY_PEM.encode())
+        else:
+            with open(PUBLIC_KEY, "rb") as f:
+                public_key = serialization.load_pem_public_key(f.read())
 
         public_key.verify(
             assinatura,
