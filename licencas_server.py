@@ -23,6 +23,7 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = SECRET_KEY
 
 
+
 # ========== BANCO ==========
 def conectar():
     conn = sqlite3.connect(DB)
@@ -47,6 +48,7 @@ def init_db():
     conn.commit()
     conn.close()
 
+init_db()
 
 # ========== GERAÇÃO ==========
 def carregar_chave_privada(senha=None):
@@ -246,6 +248,5 @@ def verificar_licenca():
 
 # ========== EXECUÇÃO ==========
 if __name__ == "__main__":
-    init_db()
     port = int(os.environ.get("PORT", 5050))
     app.run(host="0.0.0.0", port=port)
