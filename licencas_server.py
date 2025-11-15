@@ -22,6 +22,9 @@ os.makedirs(LIC_DIR, exist_ok=True)
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = SECRET_KEY
 
+# Sessão expira ao fechar o navegador
+app.permanent_session_lifetime = datetime.timedelta(days=1)
+
 
 
 # ========== BANCO ==========
@@ -106,6 +109,7 @@ def login():
         user = request.form.get("user")
         pwd = request.form.get("pwd")
         if user == ADMIN_USER and check_password_hash(ADMIN_PASS_HASH, pwd):
+            session.permanent = False
             session["admin"] = True
             return redirect(url_for("painel"))
         return render_template("login.html", erro="Usuário ou senha inválidos")

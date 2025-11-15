@@ -5,9 +5,18 @@
     <span class="navbar-brand">
       🔐 Central de Licenças
     </span>
-    <span class="text-muted small">
-      Total: {{ total }} | Ativas: {{ ativas }} | Revogadas: {{ revogadas }}
-    </span>
+    <div class="d-flex align-items-center gap-4">
+      <span class="text-muted small">
+        Total: {{ total }} | Ativas: {{ ativas }} | Revogadas: {{ revogadas }}
+      </span>
+
+      <!-- 🌟 Botão sair estilizado -->
+      <a href="/logout" class="btn btn-outline-warning btn-sm px-3"
+         style="font-weight: 600; border-radius: 6px;">
+        🔓 Sair
+      </a>
+
+    </div>
   </div>
 </nav>
 
