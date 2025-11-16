@@ -4,7 +4,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.backends import default_backend
 from werkzeug.security import generate_password_hash, check_password_hash
-from backup import fazer_backup
+from backup import backup_dropbox
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -72,10 +72,11 @@ def init_db():
 
 init_db()
 
+# ===== INTEGRAÇÃO COM DROPBOX =====
 try:
-    fazer_backup(DB)
+    backup_dropbox(DB)
 except Exception as e:
-    print("⚠️ Falha ao fazer backup automático:", e)
+    print("⚠️ Falha ao iniciar backup automático:", e)
 
 # ========== GERAÇÃO ==========
 def carregar_chave_privada(senha=None):

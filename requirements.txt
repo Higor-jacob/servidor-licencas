@@ -3,8 +3,4 @@ cryptography==42.0.8
 sqlite-utils==3.36
 gunicorn==21.2.0
 waitress==3.0.2
-
-google-api-python-client
-google-auth
-google-auth-oauthlib
-google-auth-httplib2
+dropbox
