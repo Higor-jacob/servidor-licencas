@@ -8,12 +8,16 @@ from waitress import serve
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# 🔹 Diretório persistente do Render
+# 🔹 Diretório persistente no Render
 PERSIST_DIR = "/opt/render/persistent/licencas"
 os.makedirs(PERSIST_DIR, exist_ok=True)
 
 # 🔹 Banco persistente
 DB = os.path.join(PERSIST_DIR, "licencas.db")
+
+# 🔹 Licenças geradas (também persistente)
+LIC_DIR = os.path.join(PERSIST_DIR, "licencas_emitidas")
+os.makedirs(LIC_DIR, exist_ok=True)
 
 # 🔹 Chaves
 PRIVATE_KEY = os.path.join(BASE_DIR, "private.pem")
@@ -22,9 +26,6 @@ PUBLIC_KEY = os.path.join(BASE_DIR, "public.pem")
 PRIVATE_KEY_PEM = os.getenv("PRIVATE_KEY_PEM")
 PUBLIC_KEY_PEM = os.getenv("PUBLIC_KEY_PEM")
 
-# 🔹 Licenças geradas (persistente)
-LIC_DIR = os.path.join(PERSIST_DIR, "licencas_emitidas")
-os.makedirs(LIC_DIR, exist_ok=True)
 
 SECRET_KEY = os.environ.get("SECRET_KEY", os.urandom(32))
 ADMIN_USER = "admin"
@@ -43,8 +44,11 @@ def conectar():
     return conn
 
 def init_db():
+    primeiro_banco = not os.path.exists(DB)
+
     conn = conectar()
     cur = conn.cursor()
+
     cur.execute("""
         CREATE TABLE IF NOT EXISTS licencas (
             id INTEGER PRIMARY KEY,
@@ -57,8 +61,14 @@ def init_db():
             revogado_em TEXT
         )
     """)
+
     conn.commit()
     conn.close()
+
+    if primeiro_banco:
+        print("📌 Banco criado pela primeira vez:", DB)
+    else:
+        print("📌 Banco já existia, mantendo dados:", DB)
 
 init_db()
 
@@ -276,49 +286,63 @@ def verificar_licenca():
         return jsonify({"status": "invalida", "erro": str(e)})
 
 
-# ============================================
-# 🔧 PAINEL DE DEBUG UNIVERSAL
-# ============================================
-
+# ================================
+# 🔧 PAINEL DE DEBUG (com login)
+# ================================
 @app.route("/debug")
+@exige_login
 def debug_home():
     return """
     <h1>Debug Tools</h1>
     <ul>
-        <li><a href='/debug/dbpath'>Mostrar caminho do banco</a></li>
-        <li><a href='/debug/show'>Mostrar registros</a></li>
-        <li><a href='/debug/download-db'>Baixar banco</a></li>
-        <li><a href='/debug/upload-db'>Subir banco</a></li>
-        <li><a href='/debug/migrar'>Migrar banco antigo para o persistente</a></li>
+        <li><a href='/debug/dbpath'>📌 Caminho do banco</a></li>
+        <li><a href='/debug/show'>📋 Mostrar registros</a></li>
+        <li><a href='/debug/download-db'>⬇️ Baixar banco</a></li>
+        <li><a href='/debug/upload-db'>⬆️ Subir banco</a></li>
+        <li><a href='/debug/migrar'>🔄 Migrar banco antigo</a></li>
     </ul>
     """
 
 @app.route("/debug/dbpath")
+@exige_login
 def debug_dbpath():
-    return f"Banco atual: {DB}"
+    return f"<h3>Banco atual:</h3><p>{DB}</p>"
 
 @app.route("/debug/show")
+@exige_login
 def debug_show():
     conn = conectar()
     cur = conn.cursor()
     cur.execute("SELECT * FROM licencas")
-    dados = [dict(row) for row in cur.fetchall()]
+    dados = [dict(r) for r in cur.fetchall()]
     conn.close()
     return jsonify(dados)
 
+# BAIXAR DB
 @app.route("/debug/download-db")
+@exige_login
 def debug_download():
-    return send_from_directory(os.path.dirname(DB), os.path.basename(DB), as_attachment=True)
+    return send_from_directory(
+        os.path.dirname(DB),
+        os.path.basename(DB),
+        as_attachment=True
+    )
 
+# UPLOAD DB
 @app.route("/debug/upload-db", methods=["GET", "POST"])
+@exige_login
 def debug_upload():
     if request.method == "POST":
         file = request.files.get("arquivo")
         if file:
-            file.save(DB)
+            # sobrescreve com segurança
+            temp = DB + ".tmp"
+            file.save(temp)
+
+            os.replace(temp, DB)  # troca atômica
             return "✔ Banco atualizado com sucesso!"
         return "❌ Nenhum arquivo enviado."
-    
+
     return """
     <h3>Enviar novo banco (.db)</h3>
     <form method='post' enctype='multipart/form-data'>
@@ -327,7 +351,9 @@ def debug_upload():
     </form>
     """
 
+# MIGRAR DB ANTIGO
 @app.route("/debug/migrar")
+@exige_login
 def debug_migrar():
     antigo = "/opt/render/project/src/licencas.db"
     novo = DB
@@ -337,6 +363,25 @@ def debug_migrar():
         shutil.copy(antigo, novo)
         return "✔ Banco migrado para o persistente!"
     return "❌ Banco antigo não encontrado."
+
+
+# ============================================
+# 📊 TELA DE VISUALIZAÇÃO DO BANCO (mini-phpMyAdmin)
+# ============================================
+
+@app.route("/admin/db")
+@exige_login
+def admin_db():
+    conn = conectar()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM licencas ORDER BY id DESC")
+    dados = cur.fetchall()
+    conn.close()
+
+    # Converte para lista de dicionários
+    licencas = [dict(row) for row in dados]
+
+    return render_template("db_view.html", licencas=licencas)
 
 # ========== EXECUÇÃO ==========
 if __name__ == "__main__":

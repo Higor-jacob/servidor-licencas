@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+
+<nav class="navbar navbar-dark bg-dark border-bottom border-secondary mb-4">
+  <div class="container-fluid d-flex justify-content-between">
+    <span class="navbar-brand">📊 Visualização do Banco</span>
+
+    <a href="/admin" class="btn btn-outline-warning btn-sm">
+      ⬅️ Voltar ao Painel
+    </a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <div class="alert alert-secondary bg-opacity-25">
+    <strong>Total de registros:</strong> {{ licencas|length }}
+  </div>
+
+  <table class="table table-dark table-hover align-middle">
+    <thead class="table-secondary text-dark">
+      <tr>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>HWID</th>
+        <th>Emitida</th>
+        <th>Expira</th>
+        <th>Arquivo</th>
+        <th>Status</th>
+        <th>Revogado em</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for l in licencas %}
+      <tr>
+        <td>{{ l.id }}</td>
+        <td>{{ l.cliente }}</td>
+        <td><small>{{ l.hwid or "-" }}</small></td>
+        <td><small>{{ l.issued_at }}</small></td>
+        <td><small>{{ l.expires_at }}</small></td>
+        <td>{{ l.arquivo }}</td>
+
+        <td>
+          {% if l.revogado %}
+            <span class="badge bg-danger">Revogada</span>
+          {% else %}
+            <span class="badge bg-success">Ativa</span>
+          {% endif %}
+        </td>
+
+        <td>
+          <small>{{ l.revogado_em or "-" }}</small>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+
+{% endblock %}
