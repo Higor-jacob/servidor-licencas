@@ -3,6 +3,7 @@ import datetime
 import json
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
 
 
 def fazer_backup(DB_PATH: str):
@@ -10,7 +11,6 @@ def fazer_backup(DB_PATH: str):
     
     print("📦 Iniciando backup automático do banco...")
 
-    # Credenciais via variável de ambiente
     creds_json = os.getenv("GOOGLE_CREDENTIALS_JSON")
     if not creds_json:
         print("❌ GOOGLE_CREDENTIALS_JSON não configurado.")
@@ -24,7 +24,6 @@ def fazer_backup(DB_PATH: str):
 
     service = build("drive", "v3", credentials=creds)
 
-    # Nome do arquivo de backup
     agora = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%SZ")
     backup_name = f"backup_licencas_{agora}.db"
 
@@ -33,12 +32,11 @@ def fazer_backup(DB_PATH: str):
         "mimeType": "application/octet-stream"
     }
 
-    # Upload do arquivo
-    media_body = open(DB_PATH, "rb")
+    media = MediaFileUpload(DB_PATH, mimetype="application/octet-stream")
 
     upload = service.files().create(
         body=file_metadata,
-        media_body=media_body,
+        media_body=media,
         fields="id"
     ).execute()
 
