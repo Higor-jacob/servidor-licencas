@@ -6,7 +6,7 @@ BACKUP_SERVER_URL = os.getenv("BACKUP_SERVER_URL")  # ex: https://meu-backup.onr
 BACKUP_TOKEN = os.getenv("BACKUP_TOKEN")            # token do projeto servidor_licencas
 
 
-def backup_remoto(caminho_db):
+def enviar_backup_remoto(caminho_db):
     """
     Envia o banco sqlite local para o ServidorBackup centralizado.
     Substitui totalmente o antigo backup_dropbox().
