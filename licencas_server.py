@@ -4,7 +4,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.backends import default_backend
 from werkzeug.security import generate_password_hash, check_password_hash
-from backup import backup_dropbox
+from backup_remoto import enviar_backup_remoto
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -74,7 +74,7 @@ init_db()
 
 # ===== INTEGRAÇÃO COM DROPBOX =====
 try:
-    backup_dropbox(DB)
+    enviar_backup_remoto(DB)
 except Exception as e:
     print("⚠️ Falha ao iniciar backup automático:", e)
 
