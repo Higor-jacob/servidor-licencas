@@ -4,7 +4,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.backends import default_backend
 from werkzeug.security import generate_password_hash, check_password_hash
-from waitress import serve
+from backup import fazer_backup
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -71,6 +71,11 @@ def init_db():
         print("📌 Banco já existia, mantendo dados:", DB)
 
 init_db()
+
+try:
+    fazer_backup(DB)
+except Exception as e:
+    print("⚠️ Falha ao fazer backup automático:", e)
 
 # ========== GERAÇÃO ==========
 def carregar_chave_privada(senha=None):
