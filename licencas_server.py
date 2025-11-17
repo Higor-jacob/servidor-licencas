@@ -389,6 +389,88 @@ def admin_db():
 
     return render_template("db_view.html", licencas=licencas)
 
+# ==============================================
+# 🔥 SISTEMA DE TRIAL PERMANENTE — LADO DO SERVIDOR
+# ==============================================
+
+def init_trial_db():
+    conn = conectar()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS trials (
+            id INTEGER PRIMARY KEY,
+            hwid TEXT UNIQUE,
+            trial_inicio TEXT,
+            trial_fim TEXT,
+            consumido INTEGER DEFAULT 0
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+# inicializa tabela
+init_trial_db()
+
+
+@app.route("/api/verificar_trial", methods=["POST"])
+def api_verificar_trial():
+    dados = request.json
+    hwid = dados.get("hwid")
+
+    if not hwid:
+        return jsonify({"erro": "hwid ausente"}), 400
+
+    conn = conectar()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM trials WHERE hwid=?", (hwid,))
+    row = cur.fetchone()
+    conn.close()
+
+    if row:
+        return jsonify({
+            "consumido": bool(row["consumido"]),
+            "trial_inicio": row["trial_inicio"],
+            "trial_fim": row["trial_fim"]
+        })
+
+    return jsonify({
+        "consumido": False,
+        "trial_inicio": None,
+        "trial_fim": None
+    })
+
+
+@app.route("/api/registrar_trial", methods=["POST"])
+def api_registrar_trial():
+    dados = request.json
+    hwid = dados.get("hwid")
+    inicio = dados.get("trial_inicio")
+    fim = dados.get("trial_fim")
+
+    if not hwid or not inicio or not fim:
+        return jsonify({"erro": "dados incompletos"}), 400
+
+    conn = conectar()
+    cur = conn.cursor()
+
+    # Se já existir, não criar outro
+    cur.execute("SELECT * FROM trials WHERE hwid=?", (hwid,))
+    existente = cur.fetchone()
+
+    if existente:
+        return jsonify({"status": "ja_existe"})
+
+    cur.execute("""
+        INSERT INTO trials (hwid, trial_inicio, trial_fim, consumido)
+        VALUES (?, ?, ?, 1)
+    """, (hwid, inicio, fim))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"status": "registrado"})
+
+
 # ========== EXECUÇÃO ==========
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5050))
