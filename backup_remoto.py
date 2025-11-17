@@ -2,9 +2,8 @@ import requests
 import os
 
 # URL do servidor de backup
-BACKUP_SERVER_URL = os.getenv("BACKUP_SERVER_URL")  # ex: https://meu-backup.onrender.com/api/upload
-BACKUP_TOKEN = os.getenv("BACKUP_TOKEN")            # token do projeto servidor_licencas
-
+BACKUP_SERVER_URL = os.getenv("BACKUP_SERVER_URL")
+BACKUP_TOKEN      = os.getenv("BACKUP_TOKEN")           
 
 def enviar_backup_remoto(caminho_db):
     """
