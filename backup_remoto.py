@@ -4,6 +4,7 @@ import os
 BACKUP_SERVER_URL = os.getenv("BACKUP_SERVER_URL")
 BACKUP_TOKEN      = os.getenv("BACKUP_TOKEN")
 
+
 def enviar_backup_remoto(caminho_db):
     """
     Envia o banco SQLite para o ServidorBackup.

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+
+<nav class="navbar navbar-dark bg-dark border-bottom border-secondary mb-4">
+  <div class="container-fluid d-flex justify-content-between">
+    <span class="navbar-brand">🧩 Trials Registrados</span>
+
+    <div class="d-flex gap-2">
+      <a href="/admin/db" class="btn btn-outline-info btn-sm">
+        📊 Licenças
+      </a>
+      <a href="/admin" class="btn btn-outline-warning btn-sm">
+        ⬅️ Voltar ao Painel
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <div class="alert alert-secondary bg-opacity-25">
+    <strong>Total de trials:</strong> {{ trials|length }}
+  </div>
+
+  <table class="table table-dark table-hover align-middle">
+    <thead class="table-secondary text-dark">
+      <tr>
+        <th>ID</th>
+        <th>HWID</th>
+        <th>Início</th>
+        <th>Fim</th>
+        <th>Consumido</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in trials %}
+      <tr>
+        <td>{{ t.id }}</td>
+        <td><small>{{ t.hwid }}</small></td>
+        <td><small>{{ t.trial_inicio or "-" }}</small></td>
+        <td><small>{{ t.trial_fim or "-" }}</small></td>
+        <td>
+          {% if t.consumido %}
+            <span class="badge bg-success">Registrado</span>
+          {% else %}
+            <span class="badge bg-secondary">Livre</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+
+{% endblock %}

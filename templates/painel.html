@@ -7,12 +7,19 @@
     </span>
     <div class="d-flex align-items-center gap-4">
       <span class="text-muted small">
-        Total: {{ total }} | Ativas: {{ ativas }} | Revogadas: {{ revogadas }}
+        Total: {{ total }} |
+        Ativas: {{ ativas }} |
+        Revogadas: {{ revogadas }} |
+        Trials: {{ total_trials }}
       </span>
 
       <!-- 🌟 Botão visualizar banco -->
       <a href="/admin/db" class="btn btn-outline-info btn-sm px-3">
         📊 Visualizar Banco
+      </a>
+
+      <a href="/admin/trials" class="btn btn-outline-primary btn-sm px-3">
+        📅 Trials Registradas
       </a>
 
       <!-- 🌟 Botão sair estilizado -->
